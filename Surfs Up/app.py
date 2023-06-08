@@ -65,8 +65,18 @@ def Station():
 
 @app.route('/api/v1.0/tobs')
 def tobs():
-    return  {station:date for station,date in session.query(func.max(measurement.date)).filter_by(station = 'USC00519281').first()[0]}
+    return  {date:temp for date,temp in session.query(measurement.date, measurement.tobs).filter_by(station = 'USC00519281').all()}
 
 @app.route('/api/v1.0/<start>')
-def start():
-    return { date:prcp for date, prcp in session.query(measurement.date,measurement.prcp).filter(measurement.date>'2016-08-23').all()}
+@app.route('/api/v1.0/<start>/<end>')
+def dateRange(start, end= '8-23-2017'):
+      result = session.query(func.min(measurement.tobs),
+                                 func.max(measurement.tobs),
+                                 func.avg(measurement.tobs)).\
+                                     filter_by((measurement.station=='USC00519281') & 
+                                         (measurement.date >= start)
+                                         (measurement.date <= end)).all()
+
+    result = session.query(func.min(measurement.tobs)).all()
+    
+    print(result)
